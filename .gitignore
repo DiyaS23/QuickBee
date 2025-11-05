@@ -1,0 +1,18 @@
+# Backend (Spring)
+Backend/target/
+Backend/build/
+Backend/*.jar
+Backend/*.war
+Backend/*.class
+Backend/*.iml
+
+# Frontend (React)
+Frontend/node_modules/
+Frontend/build/
+Frontend/dist/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
