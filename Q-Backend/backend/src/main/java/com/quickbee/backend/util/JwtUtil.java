@@ -3,6 +3,7 @@ package com.quickbee.backend.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ public class JwtUtil {
     // IMPORTANT: Make this a long, random, secret string and keep it safe
     // You can generate one at a site like: https://www.allkeysgenerator.com/
     // This is just an example, USE YOUR OWN!
+    @Value("${jwt.secret}")
     private final String SECRET_KEY = "your-very-long-and-super-secret-key-for-jwt-that-is-at-least-256-bits";
 
     private final SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());

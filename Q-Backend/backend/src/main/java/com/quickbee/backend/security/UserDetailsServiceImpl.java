@@ -26,8 +26,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         // Convert our Role (e.g., "ROLE_USER") into a Spring Security Authority
+        String roleName = "ROLE_" + user.getRole().name();
         Collection<? extends GrantedAuthority> authorities =
-                List.of(new SimpleGrantedAuthority(user.getRole().name()));
+                List.of(new SimpleGrantedAuthority(roleName));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
