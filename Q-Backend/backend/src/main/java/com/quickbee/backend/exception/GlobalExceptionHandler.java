@@ -1,5 +1,6 @@
 package com.quickbee.backend.exception;
 
+import com.quickbee.backend.service.OrderService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -29,4 +30,16 @@ public class GlobalExceptionHandler {
         ex.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Server error"));
     }
+    @ExceptionHandler(OrderService.InsufficientStockException.class)
+    public ResponseEntity<?> insufficient(OrderService.InsufficientStockException ex) {
+        var body = new java.util.HashMap<String,Object>();
+        body.put("error", "Insufficient stock");
+        body.put("items", ex.getItems().stream().map(s -> Map.of(
+                "productId", s.productId(),
+                "requested", s.requested(),
+                "available", s.available()
+        )).toList());
+        return ResponseEntity.status(409).body(body);
+    }
+
 }
