@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,17 +49,20 @@ public class ProductController {
 
     // ADMIN endpoints (protect later)
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Product> create(@Valid @RequestBody ProductRequest req) {
         Product p = svc.createProduct(req);
         return ResponseEntity.ok(p);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public Product update(@PathVariable String id, @Valid @RequestBody ProductRequest req) {
         return svc.updateProduct(id, req);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> delete(@PathVariable String id) {
         svc.deleteProduct(id);
         return ResponseEntity.noContent().build();
