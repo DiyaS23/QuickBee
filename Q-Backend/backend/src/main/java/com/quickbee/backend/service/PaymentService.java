@@ -56,6 +56,9 @@ public class PaymentService {
         if (!order.getUserId().equals(user.getId())) {
             throw new SecurityException("Access Denied: You do not own this order");
         }
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("This order is not pending payment. Its current status is: " + order.getStatus());
+        }
 
         Payment payment = new Payment(order.getId(), user.getId(), order.getTotal());
 
