@@ -24,7 +24,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private UserDetailsService userDetailsService; // This is your UserDetailsServiceImpl
+    private UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -32,58 +32,49 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 1. Get the Authorization header from the request
         final String authHeader = request.getHeader("Authorization");
-
         final String jwt;
         final String userEmail;
 
-        // 2. Check if the header is missing or doesn't start with "Bearer "
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response); // Pass to the next filter
-            return; // Stop here
-        }
-
-        // 3. Extract the token (the part after "Bearer ")
-        jwt = authHeader.substring(7);
-
-        // 4. Extract the user's email from the token
-        try {
-            userEmail = jwtUtil.extractUsername(jwt);
-        } catch (ExpiredJwtException e) {
-            // Handle expired token
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("Token has expired");
+            filterChain.doFilter(request, response);
             return;
         }
 
-        // 5. Check if the user is ALREADY authenticated for this request
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        jwt = authHeader.substring(7);
 
-            // 6. Load the user from the database
+        // This improved try...catch gives you better error messages
+        try {
+            userEmail = jwtUtil.extractUsername(jwt);
+        } catch (ExpiredJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Error: Token has expired");
+            return;
+        } catch (io.jsonwebtoken.security.SignatureException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Error: Invalid JWT Signature. (Are you using a stale token?)");
+            return;
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.getWriter().write("Error: Invalid Token (" + e.getMessage() + ")");
+            return;
+        }
+
+        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
 
-            // 7. Validate the token
             if (jwtUtil.validateToken(jwt, userDetails)) {
-
-                // 8. If valid, create an authentication token
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                         userDetails,
-                        null, // We don't need credentials
+                        null,
                         userDetails.getAuthorities()
                 );
-
                 authToken.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
-
-                // 9. THIS IS THE MAGIC STEP:
-                // Set the user as authenticated in Spring Security's context
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }
-
-        // 10. Pass the request to the next filter
         filterChain.doFilter(request, response);
     }
 }
