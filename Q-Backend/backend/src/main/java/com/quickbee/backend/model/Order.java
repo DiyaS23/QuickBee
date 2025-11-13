@@ -31,7 +31,14 @@ public class Order {
     private Double deliveryFee;        // e.g., flat or computed
     private Double total;              // subtotal + deliveryFee
 
-    private OrderStatus status;
+    private OrderStatus status=OrderStatus.PENDING;
+    // --- delivery related ---
+    private String assignedPartnerId; // partner assigned (null if none)
+    private Instant queuedAt;         // when order was queued for delivery
+    private Instant assignedAt;       // when assigned
+    private Instant acceptedAt;       // when partner accepted
+    private Instant pickedAt;         // when picked up
+    private Instant deliveredAt;      // when delivered
 
     @CreatedDate
     private Instant createdAt;
