@@ -27,7 +27,6 @@ public class JwtUtil {
     @Autowired
     public JwtUtil(@Value("${jwt.secret}") String secretKey) {
         // This debug line proves your .env is loading.
-        System.out.println("--- JWT KEY LOADED ---: '" + secretKey + "'");
         this.SECRET_KEY = secretKey;
         this.key = Keys.hmacShaKeyFor(this.SECRET_KEY.getBytes());
     }
